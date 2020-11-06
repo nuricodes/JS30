@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Type Ahead 👀</title>
+    <link rel="stylesheet" href="ajaxTypeAhead.css">
+</head>
+
+<body>
+    <form class="search-form">
+        <input type="text" class="search" placeholder="City or State">
+        <ul class="suggestions">
+            <li>Filter for a city</li>
+            <li>or a state</li>
+        </ul>
+    </form>
+    <script>
+        const endpoint = "https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json";
+
+        // an empty array to store our cities
+        const cities = [];
+
+        // fetch returns a promise .. attaching .then returns to us a blob of raw data but doesn't know what type of data so we add json
+        fetch(endpoint)
+            .then(blob => blob.json())
+            // .then(data => console.log(data)) //shows data in console but how do we put this data in the cities array... .push perhaps?
+            // w/o spread operator the array would be nested w it will embed it
+            .then(data => cities.push(...data));
+        // * Next we want to be able to filter down the array in to a subset in the console
+        // create a function for that
+        function findMatches(wordToMatch, cities) {
+            // returns the filtered cities based on
+            return cities.filter(place => {
+                // regular expression (regex how you put a variable into a regular expression) (whatever the person puts in, g=global i=insensitive matches lowercase AND uppercase)
+                const regex = new RegExp(wordToMatch, 'gi');
+                // if the city or state matches what was searched (needs a variable bc the letters searched will change(where regex comes in))
+                return place.city.match(regex) || place.state.match(regex)
+            });
+        }
+        // adds commas (we'll wrap this around the population number)
+        function numberWithCommas(x) {
+            return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        // * Next we want to be able to display that
+        // will be called whenever the input value changes
+        function displayMatches() {
+            const matchArray = findMatches(this.value, cities);
+
+            // *make sure you get your data first and then worry about hooking up the event listeners and etc*
+
+            // loop over the array
+            const html = matchArray.map(place => {
+                // matches city name
+                const regex = new RegExp(this.value, 'gi');
+                // replaces regex/whatever it matches with w.e the person searches for
+                const cityName = place.city.replace(regex, `<span class="hl">${this.value}</span>`);
+                const stateName = place.state.replace(regex, `<span class="hl">${this.value}</span>`);
+                // from each of those return the following
+                return `
+                <li>
+                    <span class="name">${cityName}, ${stateName}</span>
+                    <span class="population">${numberWithCommas(place.population)}</span>
+                </li>
+                `;
+            }).join('') //.join() turns it in to an array with multiple items to one big string
+            // call the html function by attaching it it the ul tage we selected below
+            suggestions.innerHTML = html;
+
+        }
+
+        // select the input & li we will be working with
+        const searchInput = document.querySelector('.search');
+        const suggestions = document.querySelector('.suggestions');
+
+        // add event listeners for change
+        searchInput.addEventListener('change', displayMatches);
+        searchInput.addEventListener('keyup', displayMatches);
+    </script>
+</body>
+
+</html>
