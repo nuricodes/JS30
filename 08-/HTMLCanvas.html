@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>HTML5 Canvas</title>
+</head>
+
+<body>
+    <canvas id="draw" width="800" height="800"></canvas>
+    <script>
+        // grab the canvas element 
+        const canvas = document.querySelector("#draw");
+        // where we will draw on/do all of our drawing
+        const ctx = canvas.getContext('2d');
+        // size up canvas to be the same size as the window
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        // gives the line a color
+        ctx.strokeStyle = '#BADA55';
+        // makes the ends round
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.lineWidth = 50;
+        // blends colors
+        // ctx.globalCompositeOperation = 'multiply';
+
+
+        // when not click and dragging no draw
+        let isDrawing = false;
+        // where you start the line from 
+        let lastX = 0;
+        // and where you end
+        let lastY = 0;
+        // start H in hsl
+        let hue = 0;
+
+        // a function for when I drag my mouse across
+        const draw = (e) => {
+            // stops the fn from running when they are not moused down
+            if (!isDrawing) return;
+            console.log(e);
+            // update the color to start at hue 0
+            ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`;
+            ctx.beginPath();
+            // start with an x and a y which will complete our drawing
+            ctx.moveTo(lastX, lastY);
+            // e.offset is a value coming from the actual event
+            // goes to whereever mouse is
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.stroke()
+            // update the x and y from 0
+            lastX = e.offsetX
+            lastY = e.offsetY
+            // increment the hue so our colors change as we drag mouse
+            hue++
+        }
+        // console is updated with mouse click movements but not browser
+        canvas.addEventListener('mousemove', draw)
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true
+            // reupdates 
+            lastX = e.offsetX
+            lastY = e.offsetY
+        })
+        canvas.addEventListener('mouseup', () => isDrawing = false)
+        canvas.addEventListener('mouseout', () => isDrawing = false) //for when mouse goes off page
+
+    </script>
+
+    <style>
+        html,
+        body {
+            margin: 0;
+        }
+    </style>
+
+</body>
+
+</html>
